@@ -19,3 +19,4 @@ if [ ${LAUNCH_OPTIONS} ]; then
 fi
 
 ros2 launch rosbot_bringup combined.launch.py ${LAUNCH_OPTIONS}
+# ros2 launch rosbot_utils flash_firmware --usb
