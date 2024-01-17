@@ -32,8 +32,9 @@ dev-install:
 dev-launch:
     #!/bin/bash
     export SERIAL_PORT=/dev/ttyUSB0
-    sudo snap set rosbot serial-port=$SERIAL_PORT
     export SERIAL_PORT_SLOT=$(snap interface serial-port | yq .slots[0] | sed 's/^\([^ ]*\) .*/\1/')
+    
+    sudo snap set rosbot serial-port=$SERIAL_PORT 
     sudo snap connect rosbot:serial-port $SERIAL_PORT_SLOT
     sudo snap connect rosbot:ros-humble ros-humble-ros-base
 
