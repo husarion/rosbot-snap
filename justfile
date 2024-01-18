@@ -1,16 +1,31 @@
 dev-build:
     #!/bin/bash
-    sudo /bin/bash -c " \
-        lxd init --minimal && \
-        export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1 && \
-        snapcraft --build-for=arm64 \
-    "
+    # sudo /bin/bash -c " \
+    #     lxd init --minimal && \
+    #     export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1 && \
+    #     snapcraft --build-for=arm64 \
+    # "
+    ARCH=$(arch)
+
+    if [ "$ARCH" = "x86_64" ]; then \
+        SNAP_ARCH="amd64"; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+        SNAP_ARCH="arm64"; \
+    else \
+        SNAP_ARCH="$ARCH"; \
+    fi
+
+    lxd init --minimal
+    export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1
+    snapcraft --build-for=${SNAP_ARCH}
 
 dev-clean:
     #!/bin/bash
-    export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1
-    sudo lxd init --minimal
-    sudo snapcraft clean
+    sudo /bin/bash -c " \
+        lxd init --minimal && \
+        export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1 && \
+        snapcraft clean \
+    "
 
 _install-rsync:
     #!/bin/bash
@@ -76,8 +91,23 @@ install-snapcraft:
     sudo snap set core experimental.hotplug=true
     sudo systemctl restart snapd
 
+    # Make sure $USER is in lxd group (you need to logout and login again after this command)
+    sudo usermod -aG lxd username
+
 # run teleop_twist_keybaord (host)
 teleop:
     #!/bin/bash
     # export FASTRTPS_DEFAULT_PROFILES_FILE=$(pwd)/shm-only.xml
     ros2 run teleop_twist_keyboard teleop_twist_keyboard # --ros-args -r __ns:=/robot
+
+push-snapcraft-store:
+    #!/bin/bash
+    export SNAPCRAFT_STORE_CREDENTIALS=$(cat ./.snapcraft_store_credentials.txt)
+    # Loop through each file matching the pattern 'rosbot_*.snap'
+    for file in rosbot_*.snap; do
+        # Check if the file exists to avoid errors
+        if [[ -f "$file" ]]; then \
+            echo "Uploading $file..."; \
+            snapcraft upload --release=edge "$file"; \
+        fi
+    done
