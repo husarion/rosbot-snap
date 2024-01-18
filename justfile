@@ -1,7 +1,7 @@
 dev-build:
     #!/bin/bash
     export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1
-    snapcraft
+    snapcraft # --debug
 
 dev-clean:
     #!/bin/bash
@@ -40,6 +40,7 @@ dev-launch:
 
 stop:
     sudo snap disconnect rosbot:ros-humble
+    sudo snap stop rosbot
 
 info:
     sudo snap get rosbot

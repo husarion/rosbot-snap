@@ -56,6 +56,12 @@ parts:
       craftctl default
 
       vcs import $CRAFT_PART_SRC < $CRAFT_PART_SRC/rosbot/rosbot_hardware.repos
+      # we don't want to build all controllers
+      cp -r $CRAFT_PART_SRC/ros2_controllers/diff_drive_controller $CRAFT_PART_SRC/
+      cp -r $CRAFT_PART_SRC/ros2_controllers/imu_sensor_broadcaster $CRAFT_PART_SRC/
+      rm -rf $CRAFT_PART_SRC/ros2_controllers
+      # it is necessary to remove simulation - otherwise rosdep tries to install dependencies
+      # rm -r $CRAFT_PART_SRC/rosbot_gazebo
 
       # Ignore so that rosdep doesn't pull deps
       # and colcon doesn't build
