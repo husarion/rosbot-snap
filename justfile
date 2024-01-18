@@ -1,12 +1,16 @@
 dev-build:
     #!/bin/bash
-    export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1
-    snapcraft # --debug
+    sudo /bin/bash -c " \
+        lxd init --minimal && \
+        export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1 && \
+        snapcraft --build-for=arm64 \
+    "
 
 dev-clean:
     #!/bin/bash
     export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1
-    snapcraft clean
+    sudo lxd init --minimal
+    sudo snapcraft clean
 
 _install-rsync:
     #!/bin/bash
