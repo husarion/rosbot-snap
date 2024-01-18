@@ -1,10 +1,5 @@
 dev-build:
     #!/bin/bash
-    # sudo /bin/bash -c " \
-    #     lxd init --minimal && \
-    #     export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1 && \
-    #     snapcraft --build-for=arm64 \
-    # "
     ARCH=$(arch)
 
     if [ "$ARCH" = "x86_64" ]; then \
@@ -21,11 +16,8 @@ dev-build:
 
 dev-clean:
     #!/bin/bash
-    sudo /bin/bash -c " \
-        lxd init --minimal && \
-        export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1 && \
-        snapcraft clean \
-    "
+    export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1
+    snapcraft clean 
 
 _install-rsync:
     #!/bin/bash
@@ -40,9 +32,19 @@ _install-rsync:
 
 dev-install:
     #!/bin/bash
+    ARCH=$(arch)
+
+    if [ "$ARCH" = "x86_64" ]; then \
+        SNAP_ARCH="amd64"; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+        SNAP_ARCH="arm64"; \
+    else \
+        SNAP_ARCH="$ARCH"; \
+    fi
+
     if ls rosbot_*.snap 1> /dev/null 2>&1; then
         sudo snap remove --purge rosbot
-        sudo snap install ./rosbot_*.snap --dangerous; \
+        sudo snap install ./rosbot_*${SNAP_ARCH}.snap --dangerous; \
     else \
         echo "No snap found in current directory. Build it at first (run: just build)"; \
         exit 1; \
@@ -50,7 +52,8 @@ dev-install:
 
 dev-launch:
     #!/bin/bash
-    export SERIAL_PORT=/dev/ttyUSB0
+    # export SERIAL_PORT=/dev/ttyUSB0
+    export SERIAL_PORT=/dev/ttyAMA0
     export SERIAL_PORT_SLOT=$(snap interface serial-port | yq .slots[0] | sed 's/^\([^ ]*\) .*/\1/')
     
     sudo snap set rosbot serial-port=$SERIAL_PORT 
