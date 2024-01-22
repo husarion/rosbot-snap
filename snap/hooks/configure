@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 # Make sure parameters value is a boolean
-OPTS="mecanum"
+OPTS="mecanum flash"
 for OPT in ${OPTS}; do
   VALUE="$(snapctl get ${OPT})"
   if [ -n "${VALUE}" ]; then

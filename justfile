@@ -44,7 +44,8 @@ dev-install:
 
     if ls rosbot_*.snap 1> /dev/null 2>&1; then
         sudo snap remove --purge rosbot
-        sudo snap install ./rosbot_*${SNAP_ARCH}.snap --dangerous; \
+        # sudo snap install ./rosbot_*${SNAP_ARCH}.snap --dangerous; \
+        sudo snap install ./rosbot_*${SNAP_ARCH}.snap --dangerous --devmode; \
     else \
         echo "No snap found in current directory. Build it at first (run: just build)"; \
         exit 1; \
@@ -52,13 +53,22 @@ dev-install:
 
 dev-launch:
     #!/bin/bash
-    # export SERIAL_PORT=/dev/ttyUSB0
-    export SERIAL_PORT=/dev/ttyAMA0
+    export SERIAL_PORT=/dev/ttyUSB0
+    # export SERIAL_PORT=/dev/ttyAMA0
     export SERIAL_PORT_SLOT=$(snap interface serial-port | yq .slots[0] | sed 's/^\([^ ]*\) .*/\1/')
     
-    sudo snap set rosbot serial-port=$SERIAL_PORT 
+    sudo snap set rosbot serial-port=$SERIAL_PORT
+    sudo snap set rosbot flash=True
     sudo snap connect rosbot:serial-port $SERIAL_PORT_SLOT
     sudo snap connect rosbot:ros-humble ros-humble-ros-base
+    sudo snap connect rosbot:raw-usb
+
+    # rosbot serial-port=$SERIAL_PORT 
+    rosbot
+    # snap run --shell rosbot
+
+dev-shell:
+    snap run --shell rosbot
 
 stop:
     sudo snap disconnect rosbot:ros-humble
@@ -103,6 +113,10 @@ teleop:
     # export FASTRTPS_DEFAULT_PROFILES_FILE=$(pwd)/shm-only.xml
     ros2 run teleop_twist_keyboard teleop_twist_keyboard # --ros-args -r __ns:=/robot
 
+snapd-interfaces:
+    snap interfaces snapd
+    # snap interface --all
+
 push-snapcraft-store:
     #!/bin/bash
     export SNAPCRAFT_STORE_CREDENTIALS=$(cat ./.snapcraft_store_credentials.txt)
@@ -114,3 +128,6 @@ push-snapcraft-store:
             snapcraft upload --release=edge "$file"; \
         fi
     done
+
+rpi4-requirments-intstall:
+    sudo snap install pi --channel=22/stable # provides bt-serial interface

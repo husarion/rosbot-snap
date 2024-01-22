@@ -34,12 +34,13 @@ architectures:
 apps:
   rosbot:
     command: usr/bin/launcher.sh
-    daemon: simple
-    install-mode: disable
+    # daemon: simple
+    # install-mode: disable
     plugs: 
       - network
       - network-bind
-      - serial-port
+      - serial-port # to allow /dev/ttyAMA0, you need "sudo snap install pi --channel=22/stable"
+      - raw-usb
     extensions:
       - ros2-humble-ros-base
 
@@ -60,12 +61,12 @@ parts:
       cp -r $CRAFT_PART_SRC/ros2_controllers/diff_drive_controller $CRAFT_PART_SRC/
       cp -r $CRAFT_PART_SRC/ros2_controllers/imu_sensor_broadcaster $CRAFT_PART_SRC/
       rm -rf $CRAFT_PART_SRC/ros2_controllers
-      # it is necessary to remove simulation - otherwise rosdep tries to install dependencies
-      # rm -r $CRAFT_PART_SRC/rosbot_gazebo
+      rm -rf $CRAFT_PART_SRC/rosbot_gazebo
 
-      # Ignore so that rosdep doesn't pull deps
-      # and colcon doesn't build
-      touch $CRAFT_PART_SRC/rosbot_gazebo/COLCON_IGNORE
+      # # Ignore so that rosdep doesn't pull deps
+      # # and colcon doesn't build
+      # touch $CRAFT_PART_SRC/ros2_controllers/COLCON_IGNORE
+      # touch $CRAFT_PART_SRC/rosbot_gazebo/COLCON_IGNORE
 
       # Set the snap version from the git tag
       # The grade is set to 'stable' if the latest entry in the git history
@@ -74,6 +75,11 @@ parts:
       [ -n "$(echo $version | grep "+git")" ] && grade=devel || grade=stable
       craftctl set version="$version"
       craftctl set grade="$grade"
+
+  pyftdi:
+    plugin: python
+    source: .
+    python-packages: [pyftdi]
 
   # copy local scripts to the snap usr/bin
   local-files:

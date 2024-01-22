@@ -6,6 +6,9 @@ snapctl set mecanum=True
 snapctl set serial-port=${SERIAL_PORT:-/dev/ttySERIAL} 
 snapctl set serial-baudrate=576000
 snapctl set namespace! # unset
+snapctl set flash=False
+
+snapctl set daemon=false
 
 if ! snapctl is-connected ros-humble; then
   logger -t ${SNAP_NAME} "Plug 'ros-humble' isn't connected, \
